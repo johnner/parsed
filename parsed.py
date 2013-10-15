@@ -1,6 +1,7 @@
 #coding:utf-8
 
 import requests
+import BeautifulSoup as BS
 VK_audios = 'http://vk.com/audios'
 
 class Parsed:
@@ -12,6 +13,7 @@ class Parsed:
         self.vk_id = str(vk_id)
         rq = self.make_request()
         rq.text
+        #BeautifulSoup or pyQuery
 
     def make_request(self):
         r = requests.get(VK_audios + self.vk_id)
