@@ -25,4 +25,5 @@ class Parsed:
         r = requests.get(VK_audios + self.vk_id)
         return r
 
-p = Parsed(vk_id=825978)
+if __name__ == '__main__':
+    p = Parsed(vk_id=825978)
