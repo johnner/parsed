@@ -34,13 +34,14 @@ class Parsed:
         self.vk_id = str(vk_id)
         audios = self.getAudioJSON(self.SID)
         # make json valid and remove slashes cause it can break downloading
-        audios = audios.replace('\'', '"')
-        sep_index = audios.find('<!>')
-        audios = audios[:sep_index]
+        self.audios = self.fix_json(audios)
+        self.process_playlist()
+        #print json_data
 
+    def process_playlist(self):
         try:
-            al = json.loads(audios)
-            for track in al.get('all'):
+            all = json.loads(self.audios)
+            for track in all.get('all'):
                 file = {
                     'link': track[2],
                     'author': track[5],
@@ -52,7 +53,6 @@ class Parsed:
                     print 'file process problem'
         except:
             print 'JSON format error'
-        #print json_data
 
     @run_async
     def download(self, file):
@@ -80,6 +80,12 @@ class Parsed:
         '''remove bullshit from the name
         '''
         return name.replace('/', ' ').replace('\\', ' ')
+
+    def fix_json(self, json):
+        json = json.replace('\'', '"')
+        sep_index = json.find('<!>')
+        json = json[:sep_index]
+        return json
 
     def getAudioJSON(self, sid):
         """Make request for vk.com audio
