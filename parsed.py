@@ -2,8 +2,13 @@
 
 import requests as r
 import json
+import threading
+import Queue
 
+#number of threads
+THREADS_NUM = 5
 VK_audio_url = 'http://vk.com/audio'
+queue = Queue.Queue()
 
 
 def run_async(func):
@@ -25,35 +30,23 @@ def run_async(func):
     return async_func
 
 
-class Parsed:
-    """Parser class"""
-    #yeah, actually it should be dynamic. FIXME
-    SID = '1ffacc8452f911ee22889e05449ce6c6cfcef0367cb3da463ef87'
+class ThreadGrabAudio(threading.Thread):
+    """Worker class
+    For every download there is a thread which is
+    represented by its instance
+    """
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
 
-    def __init__(self, vk_id):
-        self.vk_id = str(vk_id)
-        audios = self.getAudioJSON(self.SID)
-        # vk.com returns invalid json :P
-        self.audios = self.fix_json(audios)
-        self.process_playlist()
+    def run(self):
+        #queue has tasks?
+        while not queue.empty():
+            #grab file url from queue
+            file = self.queue.get()
+            self.download(file)
+            self.queue.task_done()
 
-    def process_playlist(self):
-        try:
-            all = json.loads(self.audios)
-            for track in all.get('all'):
-                file = {
-                    'link': track[2],
-                    'author': track[5],
-                    'name': track[6]
-                }
-                try:
-                    self.download(file)
-                except:
-                    print 'file process problem'
-        except:
-            print 'JSON format error'
-
-    @run_async
     def download(self, file):
         """Download files asynchronously
         and save them to local directory 'music'
@@ -79,6 +72,50 @@ class Parsed:
         """remove bullshit from the name"""
         return name.replace('/', ' ').replace('\\', ' ')
 
+
+class Parsed():
+    """Parser class
+    Creates threading pool to download playlist files
+    in parallel
+    """
+    #yeah, actually it should be dynamic. FIXME
+    SID = '1ffacc8452f911ee22889e05449ce6c6cfcef0367cb3da463ef87'
+
+    def __init__(self, vk_id):
+        self.vk_id = str(vk_id)
+
+    def run(self):
+        pass
+
+    def process_playlist(self):
+        audios = self.getAudioJSON(self.SID)
+        try:
+            all = json.loads(audios)
+
+            for track in all.get('all'):
+                file = self.trackToFile(track)
+                #populate queue with files for download
+                queue.put(file)
+
+            #spawn a thread pool
+            for i in range(THREADS_NUM):
+                t = ThreadGrabAudio(queue)
+                #t.setDaemon(True)
+                t.start()
+
+        except Exception, e:
+            print e
+
+    def trackToFile(self, track):
+        """Converting track (which is array) to file dict
+        picking only interesting track info
+        """
+        return {
+            'link': track[2],
+            'author': track[5],
+            'name': track[6]
+        }
+
     def fix_json(self, json):
         """remove slashes cause it can break downloading"""
         json = json.replace('\'', '"')
@@ -90,15 +127,17 @@ class Parsed:
         """Make request for vk.com audio
         session id must be provided for remixsid cookie param
         """
+
         res = r.post(
             url=VK_audio_url,
             headers={
                 'Cookie': '; '.join([
                     'remixdt=0',
+                    'remixtst=8537d36c',
                     'remixlang=0',
                     'remixsid=' + sid,
                     'remixflash=11.9.900',
-                    'remixseenads=2'
+                    'remixseenads=1'
                 ])
             },
             data={
@@ -111,8 +150,15 @@ class Parsed:
         )
         #cut some garbage at the beginning
         #and decode cyrilic symbols in response
-        return res.content[48:].decode('1251')
+        print res
+        res = res.content[48:].decode('1251')
+        res = self.fix_json(res)
+        return res
 
 
 if __name__ == '__main__':
-    p = Parsed(vk_id=825978)
+    #p = Parsed(vk_id=825978)
+    p = Parsed(vk_id=220235615)
+    p.process_playlist()
+    queue.join()
+    print('Playlist successfully downloaded!')
