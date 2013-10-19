@@ -33,10 +33,9 @@ class Parsed:
     def __init__(self, vk_id):
         self.vk_id = str(vk_id)
         audios = self.getAudioJSON(self.SID)
-        # make json valid and remove slashes cause it can break downloading
+        # vk.com returns invalid json :P
         self.audios = self.fix_json(audios)
         self.process_playlist()
-        #print json_data
 
     def process_playlist(self):
         try:
@@ -69,19 +68,19 @@ class Parsed:
             f.close()
 
     def make_filename(self, file):
-        '''Create normalized file name
+        """Create normalized file name
         consist of author and track name
-        '''
+        """
         author = self.normalize_name(file.get('author'))
         name = self.normalize_name(file.get('name'))
         return 'music/' + author + ' - ' + name + '.mp3'
 
     def normalize_name(self, name):
-        '''remove bullshit from the name
-        '''
+        """remove bullshit from the name"""
         return name.replace('/', ' ').replace('\\', ' ')
 
     def fix_json(self, json):
+        """remove slashes cause it can break downloading"""
         json = json.replace('\'', '"')
         sep_index = json.find('<!>')
         json = json[:sep_index]
