@@ -5,6 +5,7 @@ import json
 
 VK_audio_url = 'http://vk.com/audio'
 
+
 def run_async(func):
     """
         run_async(func)
@@ -17,18 +18,21 @@ def run_async(func):
 
     @wraps(func)
     def async_func(*args, **kwargs):
-        func_hl = Thread(target = func, args = args, kwargs = kwargs)
+        func_hl = Thread(target=func, args=args, kwargs=kwargs)
         func_hl.start()
         return func_hl
 
     return async_func
 
+
 class Parsed:
     """Parser class"""
+    #yeah, it should really be dynamic. FIXME
+    SID = '1ffacc8452f911ee22889e05449ce6c6cfcef0367cb3da463ef87'
 
     def __init__(self, vk_id):
         self.vk_id = str(vk_id)
-        audios = self.getAudioJSON()
+        audios = self.getAudioJSON(self.SID)
         # make json valid and remove slashes cause it can break downloading
         audios = audios.replace('\'', '"')
         sep_index = audios.find('<!>')
@@ -64,7 +68,6 @@ class Parsed:
                     f.flush()
             f.close()
 
-
     def make_filename(self, file):
         '''Create normalized file name
         consist of author and track name
@@ -73,30 +76,27 @@ class Parsed:
         name = self.normalize_name(file.get('name'))
         return 'music/' + author + ' - ' + name + '.mp3'
 
-
     def normalize_name(self, name):
         '''remove bullshit from the name
         '''
         return name.replace('/', ' ').replace('\\', ' ')
 
-
-    def getAudioJSON(self):
+    def getAudioJSON(self, sid):
         """Make request for vk.com audio
-        session id mus be provided in remixsid cookie param
+        session id must be provided for remixsid cookie param
         """
         res = r.post(
-            url = VK_audio_url,
-            headers = {
+            url=VK_audio_url,
+            headers={
                 'Cookie': '; '.join([
                     'remixdt=0',
                     'remixlang=0',
-                    'remixsid=1ffacc8452f911ee22889e05449ce6c6cfcef0367cb3da463ef87',
+                    'remixsid=' + sid,
                     'remixflash=11.9.900',
                     'remixseenads=2'
                 ])
             },
-
-            data = {
+            data={
                 'act': 'load_audios_silent',
                 'al': '1',
                 'gid': '0',
@@ -107,6 +107,7 @@ class Parsed:
         #cut some garbage at the beginning
         #and decode cyrilic symbols in response
         return res.content[48:].decode('1251')
+
 
 if __name__ == '__main__':
     p = Parsed(vk_id=825978)
