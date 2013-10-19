@@ -27,7 +27,7 @@ def run_async(func):
 
 class Parsed:
     """Parser class"""
-    #yeah, it should really be dynamic. FIXME
+    #yeah, actually it should be dynamic. FIXME
     SID = '1ffacc8452f911ee22889e05449ce6c6cfcef0367cb3da463ef87'
 
     def __init__(self, vk_id):
