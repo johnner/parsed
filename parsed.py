@@ -1,5 +1,6 @@
 #coding:utf-8
 
+import argparse
 import requests as r
 import json
 import threading
@@ -10,25 +11,9 @@ THREADS_NUM = 5
 VK_audio_url = 'http://vk.com/audio'
 queue = Queue.Queue()
 
-
-def run_async(func):
-    """
-        run_async(func)
-            function decorator, intended to make "func" run in a separate
-            thread (asynchronously).
-            Returns the created Thread object
-    """
-    from threading import Thread
-    from functools import wraps
-
-    @wraps(func)
-    def async_func(*args, **kwargs):
-        func_hl = Thread(target=func, args=args, kwargs=kwargs)
-        func_hl.start()
-        return func_hl
-
-    return async_func
-
+parser = argparse.ArgumentParser(description='process params')
+parser.add_argument('-i', '--id', help='vk.com user id', required=True)
+args = parser.parse_args()
 
 class ThreadGrabAudio(threading.Thread):
     """Worker class
@@ -157,8 +142,9 @@ class Parsed():
 
 
 if __name__ == '__main__':
-    #p = Parsed(vk_id=825978)
-    p = Parsed(vk_id=220235615)
-    p.process_playlist()
-    queue.join()
-    print('Playlist successfully downloaded!')
+    #request audio playlist of the user with given id
+    if args.id is not None:
+        p = Parsed(vk_id=args.id)
+        p.process_playlist()
+        queue.join()
+        print('Playlist successfully downloaded!')
