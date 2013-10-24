@@ -1,7 +1,7 @@
 parsed
 ======
 
-VK playlist music downloader
+vkontakte playlist music downloader
 
 usage
 -----
