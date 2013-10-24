@@ -18,6 +18,7 @@ parser.add_argument('-p', '--password', help='vk.com user pass', required=True)
 
 args = parser.parse_args()
 
+
 class ThreadGrabAudio(threading.Thread):
     """Worker class
     For every download there is a thread which is
@@ -77,11 +78,12 @@ class Parsed():
 
     def auth(self):
         s = requests.Session()
-        s.post('https://login.vk.com',
+        s.post(
+            'https://login.vk.com',
             data={
-                "act":"login",
-                "email":args.email,
-                "pass":args.password
+                "act": "login",
+                "email": args.email,
+                "pass": args.password
             }
         )
         return s.cookies.get('remixsid')
