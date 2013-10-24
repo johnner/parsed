@@ -1,5 +1,6 @@
 #coding:utf-8
 
+import os
 import argparse
 import requests
 import json
@@ -33,8 +34,13 @@ class ThreadGrabAudio(threading.Thread):
         while not queue.empty():
             #grab file url from queue
             file = self.queue.get()
+            self.ensure_dir('music')
             self.download(file)
             self.queue.task_done()
+
+    def ensure_dir(self, dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
     def download(self, file):
         """Download files asynchronously
