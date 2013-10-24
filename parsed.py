@@ -1,7 +1,7 @@
 #coding:utf-8
 
 import argparse
-import requests as r
+import requests
 import json
 import threading
 import Queue
@@ -12,7 +12,10 @@ VK_audio_url = 'http://vk.com/audio'
 queue = Queue.Queue()
 
 parser = argparse.ArgumentParser(description='process params')
-parser.add_argument('-i', '--id', help='vk.com user id', required=True)
+parser.add_argument('-u', '--user', help='vk.com user id', required=True)
+parser.add_argument('-e', '--email', help='vk.com user email', required=True)
+parser.add_argument('-p', '--password', help='vk.com user pass', required=True)
+
 args = parser.parse_args()
 
 class ThreadGrabAudio(threading.Thread):
@@ -36,7 +39,7 @@ class ThreadGrabAudio(threading.Thread):
         """Download files asynchronously
         and save them to local directory 'music'
         """
-        request = r.get(file.get('link'), stream=True)
+        request = requests.get(file.get('link'), stream=True)
         file_name = self.make_filename(file)
         with open(file_name, 'wb') as f:
             for chunk in request.iter_content(chunk_size=1024):
@@ -63,17 +66,28 @@ class Parsed():
     Creates threading pool to download playlist files
     in parallel
     """
-    #yeah, actually it should be dynamic. FIXME
-    SID = '1ffacc8452f911ee22889e05449ce6c6cfcef0367cb3da463ef87'
+    SID = None
 
     def __init__(self, vk_id):
         self.vk_id = str(vk_id)
+        self.SID = self.auth()
 
     def run(self):
         pass
 
+    def auth(self):
+        s = requests.Session()
+        s.post('https://login.vk.com',
+            data={
+                "act":"login",
+                "email":args.email,
+                "pass":args.password
+            }
+        )
+        return s.cookies.get('remixsid')
+
     def process_playlist(self):
-        audios = self.getAudioJSON(self.SID)
+        audios = self.getAudioJSON()
         try:
             all = json.loads(audios)
 
@@ -108,19 +122,19 @@ class Parsed():
         json = json[:sep_index]
         return json
 
-    def getAudioJSON(self, sid):
+    def getAudioJSON(self):
         """Make request for vk.com audio
         session id must be provided for remixsid cookie param
         """
 
-        res = r.post(
+        res = requests.post(
             url=VK_audio_url,
             headers={
                 'Cookie': '; '.join([
                     'remixdt=0',
                     'remixtst=8537d36c',
                     'remixlang=0',
-                    'remixsid=' + sid,
+                    'remixsid=' + self.SID,
                     'remixflash=11.9.900',
                     'remixseenads=1'
                 ])
@@ -143,8 +157,8 @@ class Parsed():
 
 if __name__ == '__main__':
     #request audio playlist of the user with given id
-    if args.id is not None:
-        p = Parsed(vk_id=args.id)
+    if args.user is not None:
+        p = Parsed(vk_id=args.user)
         p.process_playlist()
         queue.join()
-        print('Playlist successfully downloaded!')
+        print 'Playlist successfully downloaded!'
