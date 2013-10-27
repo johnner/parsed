@@ -12,13 +12,6 @@ THREADS_NUM = 5
 VK_audio_url = 'http://vk.com/audio'
 queue = Queue.Queue()
 
-parser = argparse.ArgumentParser(description='process params')
-parser.add_argument('-u', '--user', help='vk.com user id', required=True)
-parser.add_argument('-e', '--email', help='vk.com user email', required=True)
-parser.add_argument('-p', '--password', help='vk.com user pass', required=True)
-
-args = parser.parse_args()
-
 
 class ThreadGrabAudio(threading.Thread):
     """Worker class
@@ -75,8 +68,10 @@ class Parsed():
     """
     SID = None
 
-    def __init__(self, vk_id):
-        self.vk_id = str(vk_id)
+    def __init__(self, user_id='', login='', passwd=''):
+        self.user_id = str(user_id)
+        self.login = login
+        self.passwd = passwd
         self.SID = self.auth()
 
     def run(self):
@@ -88,8 +83,8 @@ class Parsed():
             'https://login.vk.com',
             data={
                 "act": "login",
-                "email": args.email,
-                "pass": args.password
+                "email": self.login,
+                "pass": self.passwd
             }
         )
         return s.cookies.get('remixsid')
@@ -151,7 +146,7 @@ class Parsed():
                 'act': 'load_audios_silent',
                 'al': '1',
                 'gid': '0',
-                'id': self.vk_id,
+                'id': self.user_id,
                 'please_dont_ddos': '2'
             }
         )
@@ -163,10 +158,24 @@ class Parsed():
         return res
 
 
-if __name__ == '__main__':
+def main():
+    parser = argparse.ArgumentParser(description='process params')
+    parser.add_argument('-u', '--user', help='vk.com user id', required=True)
+    parser.add_argument('-e', '--email', help='vk.com user email', required=True)
+    parser.add_argument('-p', '--password', help='vk.com user pass', required=True)
+
+    args = parser.parse_args()
     #request audio playlist of the user with given id
     if args.user is not None:
-        p = Parsed(vk_id=args.user)
-        p.process_playlist()
-        queue.join()
-        print 'Playlist successfully downloaded!'
+        p = Parsed(
+            user_id=args.user,
+            login=args.email,
+            passwd=args.password
+        )
+    p.process_playlist()
+    queue.join()
+    print 'Playlist successfully downloaded!'
+
+if __name__ == '__main__':
+    main()
+
