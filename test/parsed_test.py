@@ -6,20 +6,17 @@ from parsed import ThreadGrabAudio
 
 import unittest
 
+
 class TestParsedThreadGrab(unittest.TestCase):
     """Test ThreadGrabAudio worker class"""
 
     def setUp(self):
-        queue = [] #mock
-#        self.uid = 123
-#        self.login = 'test'
-#        self.passwd = 'test'
+        # stub
+        queue = []
         self.t = ThreadGrabAudio(queue)
 
-
     def test_normalize_name(self):
-        """Test whether normalize replaces slashes with spaces
-        """
+        """ Test whether normalize replaces slashes with spaces """
         name = self.t.normalize_name('\\\\test')
         name2 = self.t.normalize_name('\\test')
         name3 = self.t.normalize_name('/test')
@@ -29,7 +26,6 @@ class TestParsedThreadGrab(unittest.TestCase):
         self.assertEqual(name2, ' test')
         self.assertEqual(name3, ' test')
         self.assertEqual(name4, ' test')
-
 
     def test_normalize_separator(self):
         """Test that normalize replaces slashes with given separator"""
