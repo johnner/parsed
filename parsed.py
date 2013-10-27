@@ -12,7 +12,6 @@ THREADS_NUM = 5
 VK_audio_url = 'http://vk.com/audio'
 queue = Queue.Queue()
 
-
 class ThreadGrabAudio(threading.Thread):
     """Worker class
     For every download there is a thread which is
@@ -101,6 +100,7 @@ class Parsed():
             #spawn a thread pool
             for i in range(THREADS_NUM):
                 t = ThreadGrabAudio(queue)
+                t.daemon = True
                 t.setDaemon(True)
                 t.start()
 
