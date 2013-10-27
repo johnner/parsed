@@ -28,7 +28,7 @@ class TestParsedThreadGrab(unittest.TestCase):
         self.assertEqual(name4, ' test')
 
     def test_normalize_separator(self):
-        """Test that normalize replaces slashes with given separator"""
+        """ Test that normalize replaces slashes with given separator """
         sep = '-'
         text = 'test'
         expected = sep + text
@@ -41,6 +41,19 @@ class TestParsedThreadGrab(unittest.TestCase):
         self.assertEqual(name2, expected)
         self.assertEqual(name3, expected)
         self.assertEqual(name4, expected)
+
+    def test_normalize_empty(self):
+        name = self.t.normalize_name('')
+        name2 = self.t.normalize_name('', separator='-')
+        self.assertEqual(name, '')
+        self.assertEqual(name2, '')
+
+    def test_make_file(self):
+        file = {'author': 'Gorillaz', 'name': 'Kids with Guns'}
+        mf = 'music'
+        self.t.music_folder = mf
+        filename = self.t.make_filename(file)
+        self.assertEqual(filename, mf+'/'+'Gorillaz - Kids with Guns.mp3')
 
 
 if __name__ == '__main__':
