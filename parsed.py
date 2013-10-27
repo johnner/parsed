@@ -12,6 +12,7 @@ THREADS_NUM = 5
 VK_audio_url = 'http://vk.com/audio'
 queue = Queue.Queue()
 
+
 class ThreadGrabAudio(threading.Thread):
     """Worker class
     For every download there is a thread which is
@@ -162,9 +163,19 @@ class Parsed():
 
 def main():
     parser = argparse.ArgumentParser(description='process params')
-    parser.add_argument('-u', '--user', help='vk.com user id', required=True)
-    parser.add_argument('-e', '--email', help='vk.com user email', required=True)
-    parser.add_argument('-p', '--password', help='vk.com user pass', required=True)
+    parser.add_argument(
+        '-u', '--user',
+        help='vk.com user id',
+        required=True)
+    parser.add_argument(
+        '-e', '--email',
+        help='vk.com user email',
+        required=True)
+    parser.add_argument(
+        '-p',
+        '--password',
+        help='vk.com user pass',
+        required=True)
 
     args = parser.parse_args()
     #request audio playlist of the user with given id
@@ -183,4 +194,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
