@@ -1,6 +1,7 @@
 #coding:utf-8
 
 import os
+import re
 import argparse
 import requests
 import json
@@ -51,9 +52,12 @@ class ThreadGrabAudio(threading.Thread):
         name = self.normalize_name(file.get('name'))
         return 'music/' + author + ' - ' + name + '.mp3'
 
-    def normalize_name(self, name):
-        """remove bullshit from the name"""
-        return name.replace('/', ' ').replace('\\', ' ')
+    def normalize_name(self, name, separator=' '):
+        """remove bullshit from the name and replace with spaces"""
+        rep = ["\\\\", "\\", '//', '/']
+        for n in rep:
+            name = name.replace(n, separator)
+        return name
 
 
 class Parsed():
