@@ -82,7 +82,10 @@ class Parsed():
                 "pass": self.passwd
             }
         )
-        return s.cookies.get('remixsid')
+        sid = s.cookies.get('remixsid')
+        if not sid:
+            print 'Authorization problem'
+        return sid
 
     def process_playlist(self):
         audios = self.getAudioJSON()
@@ -98,7 +101,7 @@ class Parsed():
             #spawn a thread pool
             for i in range(THREADS_NUM):
                 t = ThreadGrabAudio(queue)
-                #t.setDaemon(True)
+                t.setDaemon(True)
                 t.start()
 
         except Exception, e:
@@ -129,7 +132,6 @@ class Parsed():
         """Make request for vk.com audio
         session id must be provided for remixsid cookie param
         """
-
         res = requests.post(
             url=VK_audio_url,
             headers={
@@ -172,9 +174,12 @@ def main():
             login=args.email,
             passwd=args.password
         )
-    p.process_playlist()
-    queue.join()
-    print 'Playlist successfully downloaded!'
+    try:
+        p.process_playlist()
+        queue.join()
+        print 'Playlist successfully downloaded!'
+    except:
+        print 'Cannot download playlist'
 
 if __name__ == '__main__':
     main()
