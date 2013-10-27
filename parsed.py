@@ -18,6 +18,8 @@ class ThreadGrabAudio(threading.Thread):
     For every download there is a thread which is
     represented by its instance
     """
+    music_folder = 'music'
+
     def __init__(self, queue):
         threading.Thread.__init__(self)
         self.queue = queue
@@ -49,7 +51,7 @@ class ThreadGrabAudio(threading.Thread):
         """
         author = self.normalize_name(file.get('author'))
         name = self.normalize_name(file.get('name'))
-        return 'music/' + author + ' - ' + name + '.mp3'
+        return self.music_folder + '/' + author + ' - ' + name + '.mp3'
 
     def normalize_name(self, name, separator=' '):
         """remove bullshit from the name and replace with spaces"""
