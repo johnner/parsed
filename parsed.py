@@ -27,13 +27,8 @@ class ThreadGrabAudio(threading.Thread):
         while not queue.empty():
             #grab file url from queue
             file = self.queue.get()
-            self.ensure_dir('music')
             self.download(file)
             self.queue.task_done()
-
-    def ensure_dir(self, dir):
-        if not os.path.exists(dir):
-            os.makedirs(dir)
 
     def download(self, file):
         """Download files asynchronously
@@ -91,6 +86,7 @@ class Parsed():
 
     def process_playlist(self):
         audios = self.getAudioJSON()
+        self.ensure_dir('music')
         try:
             all = json.loads(audios)
 
@@ -107,6 +103,10 @@ class Parsed():
 
         except Exception, e:
             print e
+
+    def ensure_dir(self, dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
     def trackToFile(self, track):
         """Converting track (which is array) to file dict
