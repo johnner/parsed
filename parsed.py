@@ -1,4 +1,11 @@
 #coding:utf-8
+"""
+VK.com playlist downloader
+Downloads entire user audio playlist to the local folder
+Authorization required, you must have vkontante login/pass
+usage: 
+python parsed.py -e <your_login> -p <your_pass> -u <user_id with playlist>
+"""
 
 import os
 import argparse
@@ -15,8 +22,8 @@ queue = Queue.Queue()
 
 class ThreadGrabAudio(threading.Thread):
     """Worker class
-    For every download there is a thread which is
-    represented by its instance
+    For every download there is a thread instance which is
+    represented by this class
     """
     music_folder = 'music'
 
@@ -127,13 +134,6 @@ class Parsed():
             'name': track[6]
         }
 
-    def fix_json(self, json):
-        """remove slashes cause it can break downloading"""
-        json = json.replace('\'', '"')
-        sep_index = json.find('<!>')
-        json = json[:sep_index]
-        return json
-
     def getAudioJSON(self):
         """Make request for vk.com audio
         session id must be provided for remixsid cookie param
@@ -164,6 +164,13 @@ class Parsed():
         res = res.content[48:].decode('1251')
         res = self.fix_json(res)
         return res
+        
+    def fix_json(self, json):
+        """remove slashes since they can break download process"""
+        json = json.replace('\'', '"')
+        sep_index = json.find('<!>')
+        json = json[:sep_index]
+        return json
 
 
 def main():

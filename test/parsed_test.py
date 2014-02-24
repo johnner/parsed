@@ -56,6 +56,9 @@ class TestParsedThreadGrab(unittest.TestCase):
 
     def test_custom_file_folder(self):
         self.test_make_file(mf='sounds')
+        
+    def test_default_user(self):
+        pass
 
 
 if __name__ == '__main__':
