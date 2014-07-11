@@ -61,8 +61,11 @@ class ThreadGrabAudio(threading.Thread):
         return self.music_folder + '/' + author + ' - ' + name + '.mp3'
 
     def normalize_name(self, name, separator=' '):
-        """remove bullshit from the name and replace with spaces"""
-        rep = ["\\\\", "\\", '//', '/']
+        """remove bullshit from the name and replace with separtor"""
+        bs = ['&', '#', "'", ';', '?', ':']
+        rep = ['\\\\', '\\', '//', '/']
+        for b in bs:
+            name = name.replace(b, '')
         for n in rep:
             name = name.replace(n, separator)
         return name
